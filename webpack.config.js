@@ -62,6 +62,47 @@ module.exports = {
   },
   module: {
     rules: [{
+        test: /\.jsx?$/,
+        loader: 'eslint-loader', // 先代码校验，再编译代码
+        enforce: 'pre', //强制指定顺序 pre normal inline post
+        options: {
+          fix: true
+        },
+        exclude: /node_modules/,
+        include: resolve(__dirname, 'src')
+      },
+      {
+        test: /\.jsx?$/,
+        use: [{
+          loader: 'babel-loader',
+          options: {
+            // 预设是插件的集合
+            presets: [
+              ["@babel/preset-env", {
+                useBuiltIns: 'usage', // 按需加载polyfill
+                corejs: {
+                  version: 3
+                },
+                targets: {
+                  chrome: '60',
+                  firefox: '60',
+                  ie: '9'
+                }
+              }], //转换js语法
+              "@babel/preset-react" // 转换jsx语法
+            ],
+            plugins: [
+              ["@babel/plugin-proposal-decorators", {
+                legacy: true
+              }],
+              ["@babel/plugin-proposal-class-properties", {
+                legacy: true
+              }]
+            ]
+          }
+        }]
+      },
+      {
         test: /.txt$/,
         use: 'raw-loader', //npm i raw-loader -D
       },
@@ -78,27 +119,29 @@ module.exports = {
         use: ['style-loader', 'css-loader', 'sass-loader']
       },
       {
-        test: /\.html$/,
-        use: ['html-loader'] //解析html中出现的相对路径
-      },
-      {
         test: /\.(jpg|png|gif|bmp)$/,
-        // use: [{
-        //   loader: 'file-loader',
-        //   options: {
-        //     name: '[hash:10].[ext]', // 哈希前10位+扩展名
-        //     esModule: false, // 不使用es6模块
-        //   }
-        // }],
         use: [{
-          loader: 'url-loader',
+          loader: 'file-loader',
           options: {
             name: '[hash:10].[ext]', // 哈希前10位+扩展名
             esModule: false, // 不使用es6模块
-            limit: 128 * 1024
           }
-        }]
-      }
+        }],
+        // use: [{
+        //   loader: 'url-loader',
+        //   options: {
+        //     name: '[hash:10].[ext]', // 哈希前10位+扩展名
+        //     esModule: false, // 不使用es6模块
+        //     limit: 128 * 1024
+        //   }
+        // }]
+      },
+      {
+        test: /\.html$/,
+        use: ['html-loader'] //解析html中出现的相对路径
+      },
+
+
     ]
   },
   plugins: [
