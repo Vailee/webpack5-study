@@ -2,6 +2,10 @@ const {
   resolve
 } = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const {
+  CleanWebpackPlugin
+} = require('clean-webpack-plugin');
 module.exports = {
   mode: 'development', // production
   entry: './src/index.js',
@@ -55,10 +59,31 @@ module.exports = {
 
       serverSideRender: false,
       //  关闭服务器端渲染模式。有关详细信息，请参阅服务器端渲染部分。
+      // proxy: {
+      //   '/api': {
+      //     target: 'http://localhost:3000',
+      //     pathPewrite: {
+      //       "^/api": ""
+      //     }
+      //   }
+      // }
+      before(app) {
+        app.get('/api/user', (req, res) => {
+          res.json([{
+            a: 1
+          }])
+        })
+      }
     },
     client: {
       progress: true, //在浏览器中以百分比显示编译进度。
     },
+  },
+  watch: true,
+  watchOptions: {
+    ignored: /node_modules/, // 忽略文件
+    aggregateTimeout: 300, //防抖
+    poll: 1000, //轮询  一秒问1000次 
   },
   module: {
     rules: [{
@@ -147,6 +172,24 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html'
-    })
+    }),
+    new CopyWebpackPlugin({
+      patterns: [{
+          from: "source",
+          to: "dest"
+        },
+        {
+          from: "other",
+          to: "public"
+        },
+      ],
+    }),
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: [
+        '**/*',
+        '!static-files*',
+        '!directoryToExclude/**',
+      ],
+    }),
   ]
 }
